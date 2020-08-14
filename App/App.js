@@ -26,6 +26,8 @@ import {
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
+import buffer from 'buffer'
+
 import Geolocation from '@react-native-community/geolocation';
 
 import { RNCamera } from 'react-native-camera';
@@ -48,6 +50,10 @@ const CaptureButton: ({buttonDisabled: bool, onClick: () => mixed}) => React$Nod
 
 const DetailsScreen: ({ route : any, navigation: any }) => React$Node = ({ route, navigation }) => {
   const [address, setAddress] = React.useState('');
+  const [licensePlate, setLicensePlate] = React.useState('');
+  const [plateLoaded, setPlateLoaded] = React.useState(false);
+  const [addressLoaded, setAddressLoaded] = React.useState(false);
+
 
   useEffect(() => {
     const fetchAddress = async () => { 
@@ -55,9 +61,31 @@ const DetailsScreen: ({ route : any, navigation: any }) => React$Node = ({ route
       const response = await fetch(`https://mobile.um.warszawa.pl/cxf/bgik/rest/nearestPoint?latitude=${geo.coords.latitude}&longitude=${geo.coords.longitude}`);
       const addr = await response.json();
       setAddress(`${addr.address} ${addr.postalCode}`);
+      setAddressLoaded(true);
     };
 
     fetchAddress();
+  }, []);  
+
+  useEffect(() => {
+    const fetchLicensePlate = async () => { 
+      const img = route.params.data.base64;
+      const response = await fetch(
+          "https://stroller.azurewebsites.net/api/getplate?code=A9WwRfqqpYNNCjllWOVERLXsrIh/heRM9xzZ3uVwnwOceIDPOpW0jA==", 
+          {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'image/jpeg; charset=utf-8',
+          },
+          body: buffer.Buffer.from(img, 'base64'),
+        });
+
+      const plateResponse = await response.text();
+      setLicensePlate(plateResponse);
+      setPlateLoaded(true);
+    };
+
+    fetchLicensePlate();
   }, []);  
 
   return (
@@ -68,16 +96,16 @@ const DetailsScreen: ({ route : any, navigation: any }) => React$Node = ({ route
         alignItems: 'stretch',
         justifyContent: 'flex-start',	
       }}> 
-      <ScrollView style={{
-            flex: 1,
-          }}>
-        <Image
-          style={{
-            height: Dimensions.get('window').height,
-            width: Dimensions.get('window').width,
-          }}
-          source={{ uri: route.params.data.uri }}
-        />
+      <ScrollView style={{ flex: 1 }}>
+        <ScrollView horizontal={true}>
+          <Image
+            style={{
+              height: Dimensions.get('window').height,
+              width: Dimensions.get('window').width,
+            }}
+            source={{ uri: route.params.data.uri }}
+          />
+        </ScrollView>
       </ScrollView>
       <View
         style={{
@@ -94,7 +122,7 @@ const DetailsScreen: ({ route : any, navigation: any }) => React$Node = ({ route
               justifyContent: 'center',
               alignItems: 'center'
             }}>
-            <Text style={{ marginRight: 10}}>Adres:</Text>
+            <Text style={{ marginRight: 10, width: 110}}>Adres:</Text>
           </View>
           <TextInput
             style={{ borderColor: 'gray', padding: 3, borderWidth: 1, flex: 1}}
@@ -102,6 +130,39 @@ const DetailsScreen: ({ route : any, navigation: any }) => React$Node = ({ route
             value={address}
           />
         </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            height: 30,
+            margin: 10
+          }}>
+          <View
+            style={{
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}>
+            <Text style={{ marginRight: 10, width: 110}}>Nr Rejestracyjny:</Text>
+          </View>
+          <TextInput
+            style={{ borderColor: 'gray', padding: 3, borderWidth: 1, flex: 1}}
+            onChangeText={text => setLicensePlate(text)}
+            value={licensePlate}
+          />
+        </View>
+        {!(plateLoaded && addressLoaded) && 
+          <ActivityIndicator 
+            size="large" 
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              top: 0,
+              bottom: 0,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'rgba(0,0,0,0.2)'
+            }}/>
+        }
       </View>
     </View>
   );
@@ -118,7 +179,7 @@ const CameraScreen: ({ navigation: any }) => React$Node = ({ navigation }) => {
 		if (cam) {
       cam.pausePreview();
       setIsLoading(true);
-			const data = await cam.takePictureAsync({ base64: false });
+			const data = await cam.takePictureAsync({ base64: true });
       setIdentifiedAs("identifiedImage");
       setIsLoading(false);
 
