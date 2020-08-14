@@ -3,12 +3,22 @@ import logging
 import azure.functions as func
 
 import os
+import sys
+import ctypes
+import importlib
+
+exlibpath = os.path.dirname(os.path.abspath(__file__)) + '/pkg/'
+ctypes.CDLL(exlibpath + 'libGLdispatch.so.0')
+ctypes.CDLL(exlibpath + 'libGLX.so.0')
+ctypes.CDLL(exlibpath + 'libGL.so.1')
+
+cv2 = importlib.import_module('cv2')
+
 import cv2
 import numpy as np
 from keras.models import model_from_json
 from sklearn.preprocessing import LabelEncoder
 import glob
-import sys
 
 from .helper import * 
 
