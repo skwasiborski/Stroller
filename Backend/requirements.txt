@@ -1,0 +1,8 @@
+azure-functions
+numpy==1.19.0
+opencv-python==4.3.0.38
+sklearn==0.0
+glob2==0.7
+Keras-Preprocessing==1.1.2
+Keras-Models==0.0.7
+tensorflow==2.3.0

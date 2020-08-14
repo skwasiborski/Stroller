@@ -1,0 +1,19 @@
+{
+    "configurations": [
+    {
+        "name": "Debug iOS Simulator",
+        "cwd": "${workspaceFolder}",
+        "type": "reactnative",
+        "request": "launch",
+        "platform": "ios"
+    }, 
+    {
+        "name": "Debug iOS",
+        "cwd": "${workspaceFolder}",
+        "type": "reactnative",
+        "request": "launch",
+        "platform": "ios",
+        "target": "device"
+    }
+    ]
+}
