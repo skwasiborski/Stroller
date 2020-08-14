@@ -9,15 +9,16 @@ from keras.models import model_from_json
 from sklearn.preprocessing import LabelEncoder
 import glob
 import sys
-import io
 
 from .helper import * 
 
+# global variables used for model caching
 wpod_net = []
 labels = []
 model = []
 
 def _initialize():
+    # load all models and chace in global variables
     global labels, wpod_net, model
     if not labels:
         scriptpath = os.path.abspath(__file__)
@@ -51,7 +52,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     image = np.fromstring(body, np.uint8)
     
     # --------------------------- get plate
-    LpImg, cor, L =get_plate(image,wpod_net=wpod_net)
+    LpImg, cor, L =get_plate(image, wpod_net=wpod_net)
 
     # --------------------------- extract characters
     test_roi, myboxes, crop_characters, crop_characters_orig = make_boxes(LpImg)
