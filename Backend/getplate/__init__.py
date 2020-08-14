@@ -5,13 +5,11 @@ import azure.functions as func
 import os
 import cv2
 import numpy as np
-#import matplotlib.pyplot as plt
-#import matplotlib.gridspec as gridspec
 from keras.models import model_from_json
 from sklearn.preprocessing import LabelEncoder
 import glob
-#from read_plate import *
 import sys
+import io
 
 from .helper import * 
 
@@ -38,56 +36,30 @@ def _initialize():
         json_file.close()
         model = model_from_json(loaded_model_json)
         model.load_weights(Weights_filename)
-        logging.info("[INFO] Model loaded successfully...")
+        logging.info("Model loaded successfully...")
 
         labels = LabelEncoder()
         labels.classes_ = np.load(Classes_filename)
-        logging.info("[INFO] Labels loaded successfully...")
+        logging.info("Labels loaded successfully...")
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
     _initialize()
-  
-    id = 14
-    id_str = req.params.get('id')
-    if id_str:  
-        id = int(id_str)
 
-    # --------------------------- get data for ocr
-    scriptpath = os.path.abspath(__file__)
-    scriptdir = os.path.dirname(scriptpath)
-    data_path = os.path.join(scriptdir, '../data/')
-    image_paths = glob.glob(data_path + "/*.jpg")
-
-    test_image = image_paths[id]
+    body = req.get_body()
+    image = np.fromstring(body, np.uint8)
+    
     # --------------------------- get plate
-    LpImg, cor, L =get_plate(test_image,wpod_net=wpod_net)
+    LpImg, cor, L =get_plate(image,wpod_net=wpod_net)
+
     # --------------------------- extract characters
     test_roi, myboxes, crop_characters, crop_characters_orig = make_boxes(LpImg)
+    
     # --------------------------- read characters
     final_string = ''
     for i,character in enumerate(crop_characters): 
         char=np.array2string(predict_from_model(character,model,labels))
         final_string+=char.strip("'[]")
 
-    print(final_string)
-
     return func.HttpResponse(final_string)
-    
-    # name = req.params.get('name')
-    # if not name:
-    #     try:
-    #         req_body = req.get_json()
-    #     except ValueError:
-    #         pass
-    #     else:
-    #         name = req_body.get('name')
-
-    # if name:
-    #     return func.HttpResponse(f"Hello, {name}. This HTTP triggered function executed successfully.")
-    # else:
-    #     return func.HttpResponse(
-    #          "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.",
-    #          status_code=200
-    #     )

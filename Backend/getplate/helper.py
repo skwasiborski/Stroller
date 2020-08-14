@@ -36,17 +36,17 @@ def load_model(path):
     except Exception as e:
         print(e)
 
-def preprocess_image(image_path,resize=False):
-    img = cv2.imread(image_path)
+def preprocess_image(image,resize=False):
+    img = cv2.imdecode(image, cv2.IMREAD_UNCHANGED)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img = img / 255
     if resize:
         img = cv2.resize(img, (224,224))
     return img
 
-def get_plate(image_path, Dmax=608, Dmin=256,wpod_net =[]):
+def get_plate(image, Dmax=608, Dmin=256,wpod_net =[]):
     #print('----------------------- in get_plate')
-    vehicle = preprocess_image(image_path)
+    vehicle = preprocess_image(image)
     ratio = float(max(vehicle.shape[:2])) / min(vehicle.shape[:2])
     side = int(ratio * Dmin)
     bound_dim = min(side, Dmax)
