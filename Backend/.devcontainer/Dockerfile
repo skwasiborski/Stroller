@@ -7,4 +7,4 @@
 # https://github.com/Azure/azure-functions-docker/blob/master/host/3.0/buster/amd64/python/python38/python38-core-tools.Dockerfile
 FROM mcr.microsoft.com/azure-functions/python:3.0-python3.8-core-tools
 
-RUN apt-get update && apt-get install libgl1-mesa-glx
+# RUN apt-get update && apt-get install libgl1-mesa-glx
