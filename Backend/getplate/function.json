@@ -15,6 +15,13 @@
       "type": "http",
       "direction": "out",
       "name": "$return"
+    },
+    {
+      "name": "blobout",
+      "type": "blob",
+      "path": "data/{DateTime}.jpg",
+      "connection": "AzureWebJobsStorage",
+      "direction": "out"
     }
   ]
 }
