@@ -177,9 +177,9 @@ const CameraScreen: ({ navigation: any }) => React$Node = ({ navigation }) => {
   const takePicture = async function() {
     let cam = camera.current;
 		if (cam) {
-      cam.pausePreview();
       setIsLoading(true);
 			const data = await cam.takePictureAsync({ base64: true });
+      cam.pausePreview();
       setIdentifiedAs("identifiedImage");
       setIsLoading(false);
 
