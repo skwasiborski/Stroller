@@ -17,9 +17,16 @@
       "name": "$return"
     },
     {
-      "name": "blobout",
+      "name": "cutplate",
       "type": "blob",
-      "path": "data/{DateTime}.jpg",
+      "path": "data/{DateTime}_cutplate.jpg",
+      "connection": "AzureWebJobsStorage",
+      "direction": "out"
+    },
+    {
+      "name": "fullpicture",
+      "type": "blob",
+      "path": "data/{DateTime}_full_picture.jpg",
       "connection": "AzureWebJobsStorage",
       "direction": "out"
     }

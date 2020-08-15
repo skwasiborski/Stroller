@@ -4,5 +4,5 @@ opencv-python-headless==4.3.0.38
 sklearn==0.0
 glob2==0.7
 Keras-Preprocessing==1.1.2
-Keras-Models==0.0.7
 tensorflow==2.3.0
+Keras==2.4.3

@@ -5,16 +5,6 @@ import azure.functions as func
 import io
 import os
 import sys
-import ctypes
-import importlib
-
-exlibpath = os.path.dirname(os.path.abspath(__file__)) + '/pkg/'
-ctypes.CDLL(exlibpath + 'libGLdispatch.so.0')
-ctypes.CDLL(exlibpath + 'libGLX.so.0')
-ctypes.CDLL(exlibpath + 'libGL.so.1')
-
-cv2 = importlib.import_module('cv2')
-
 import cv2
 import numpy as np
 from keras.models import model_from_json
@@ -55,7 +45,7 @@ def _initialize():
         logging.info("Labels loaded successfully...")
 
 #def main(req: func.HttpRequest) -> func.HttpResponse:
-def main(req: func.HttpRequest, blobout: func.Out[bytes]) -> func.HttpResponse:
+def main(req: func.HttpRequest, fullpicture: func.Out[bytes], cutplate: func.Out[bytes],) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
     _initialize()
@@ -76,11 +66,20 @@ def main(req: func.HttpRequest, blobout: func.Out[bytes]) -> func.HttpResponse:
         final_string+=char.strip("'[]")
 
     # following an example https://github.com/yokawasa/azure-functions-python-samples/tree/master/v2functions/blob-trigger-watermark-blob-out-binding
-    # img_byte_arr = io.BytesIO()
+    #img_byte_arr = io.BytesIO()
     # Convert composite to RGB so we can save as JPEG
-    # image.convert('RGB').save(img_byte_arr, format='JPEG')
-    # blobout.set(img_byte_arr.getvalue())
+    #image.convert('RGB').save(img_byte_arr, format='JPEG')
+    #blobout.set(img_byte_arr.getvalue())
 
-    blobout.set(body)
+    fullpicture.set(body)
+
+    frame = LpImg[0]
+    frame = frame[:, :, [2, 1, 0]]
+    frame = 255*frame
+
+    _, encoded_image = cv2.imencode('.jpg', frame)
+    encoded_bytes = encoded_image.tobytes()
+    
+    cutplate.set(encoded_bytes)
 
     return func.HttpResponse(final_string)
