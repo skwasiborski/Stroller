@@ -2,6 +2,7 @@ import logging
 
 import azure.functions as func
 
+import io
 import os
 import sys
 import ctypes
@@ -53,7 +54,8 @@ def _initialize():
         labels.classes_ = np.load(Classes_filename)
         logging.info("Labels loaded successfully...")
 
-def main(req: func.HttpRequest) -> func.HttpResponse:
+#def main(req: func.HttpRequest) -> func.HttpResponse:
+def main(req: func.HttpRequest, blobout: func.Out[bytes]) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
     _initialize()
@@ -72,5 +74,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     for i,character in enumerate(crop_characters): 
         char=np.array2string(predict_from_model(character,model,labels))
         final_string+=char.strip("'[]")
+
+    # following an example https://github.com/yokawasa/azure-functions-python-samples/tree/master/v2functions/blob-trigger-watermark-blob-out-binding
+    # img_byte_arr = io.BytesIO()
+    # Convert composite to RGB so we can save as JPEG
+    # image.convert('RGB').save(img_byte_arr, format='JPEG')
+    # blobout.set(img_byte_arr.getvalue())
+
+    blobout.set(body)
 
     return func.HttpResponse(final_string)
